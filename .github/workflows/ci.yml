@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [ master, dev ]
+  pull_request:
+    branches: [ master, dev ]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        go-version: [ 1.23.x ]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+
+
+    - name: Install Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+
+    - name: Check Go Formatting
+      run: go fmt ./... && git diff --exit-code
+
+    - name: Check Go Mod Tidy
+      run: go mod tidy && git diff --exit-code
+
+
+    - name: Linting
+      uses: golangci/golangci-lint-action@v6
+      with:
+        version: v1.64.8
+        args: --timeout=5m
+
+    # - name: Docker Build
+    #   run: docker compose up --build -d
+
+    # - name: Test
+    #   run: go test -race ./...
