@@ -15,8 +15,6 @@ import (
 func main() {
 	var algo algorithms.Algorithm
 
-
-
 	lb_algo, ok := os.LookupEnv("LB_ALGORITHM")
 	if !ok {
 		lb_algo = "round-robin"

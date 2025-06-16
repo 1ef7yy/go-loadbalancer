@@ -28,7 +28,7 @@ type LoadBalancer interface {
 
 func NewLoadBalancer(algo algorithms.Algorithm) LoadBalancer {
 	return &loadBalancer{
-		algo: algo,
+		algo:       algo,
 		serverPool: make([]server.Server, 0),
 		proxy: &httputil.ReverseProxy{
 			Director: func(r *http.Request) {},
@@ -107,5 +107,3 @@ func serverHealthCheck(url string) bool {
 	// TODO: implement healthchecks
 	return true
 }
-
-
