@@ -1,0 +1,69 @@
+services:
+  loadbalancer:
+    build:
+      context: .
+      dockerfile: Dockerfile.loadbalancer
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    environment:
+      # round-robin least-connections random
+      - LB_ALGORITHM=least-connections
+      - BACKEND_URLS=http://backend1:8081,http://backend2:8082,http://backend3:8083
+    networks:
+      - lb_network
+
+  backend1:
+    image: hashicorp/http-echo
+    command: -text="Hello from Backend 1" -listen=:8081
+    expose:
+      - 8081
+    networks:
+      - lb_network
+
+  backend2:
+    image: hashicorp/http-echo
+    command: -text="Hello from Backend 2" -listen=:8082
+    expose:
+      - 8082
+    networks:
+      - lb_network
+
+  backend3:
+    image: hashicorp/http-echo
+    command: -text="Hello from Backend 3" -listen=:8083
+    expose:
+      - 8083
+    networks:
+      - lb_network
+
+  # prometheus:
+  #   image: prom/prometheus
+  #   ports:
+  #     - "9090:9090"
+  #   volumes:
+  #     - ./prometheus.yml:/etc/prometheus/prometheus.yml
+  #   depends_on:
+  #     - loadbalancer
+  #   networks:
+  #     - lb_network
+
+  # grafana:
+  #   image: grafana/grafana
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - grafana-storage:/var/lib/grafana
+  #   depends_on:
+  #     - prometheus
+  #   networks:
+  #     - lb_network
+
+# volumes:
+#   grafana-storage:
+
+networks:
+  lb_network:

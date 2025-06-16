@@ -2,9 +2,9 @@
 
 ## Features to implement:
 
-- [ ] ServerPool
-- [ ] RoundRobin
-- [ ] Random
+- [x] ServerPool
+- [x] RoundRobin
+- [x] Random
 - [ ] Least Connections
 - [ ] Check alive timeout (maybe a sysmon-type vibe)
 
