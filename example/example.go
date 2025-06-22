@@ -15,10 +15,7 @@ import (
 func main() {
 	var algo algorithms.Algorithm
 
-	lb_algo, ok := os.LookupEnv("LB_ALGORITHM")
-	if !ok {
-		lb_algo = "round-robin"
-	}
+	lb_algo := os.Getenv("LB_ALGORITHM")
 	switch lb_algo {
 	case "round-robin":
 		algo = algorithms.NewRoundRobin()
@@ -32,19 +29,29 @@ func main() {
 	}
 	lb := loadbalancer.NewLoadBalancer(algo)
 
-	// Get backend URLs from environment variable
 	backendURLs := strings.Split(os.Getenv("BACKEND_URLS"), ",")
-	for _, url := range backendURLs {
-		server := server.NewServer(url)
+	for i, url := range backendURLs {
+		healthFunc := func(url string) (ok bool) {
+			resp, err := http.Get(fmt.Sprintf("%s/health", url))
+			if err != nil {
+				return false
+			}
+			return resp.StatusCode == http.StatusOK
+		}
+		server := server.NewServer(
+			url,
+			server.WithHealthFunc(healthFunc),
+			server.WithInitialAliveStatus(true),
+			server.WithWeight(i))
 		lb.AddServer(server)
 
 	}
 
-	// Start health checks in background
+	// background health checks
 	go func() {
 		for {
 			lb.HealthCheck()
-			time.Sleep(30 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 	}()
 

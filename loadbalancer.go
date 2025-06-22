@@ -98,12 +98,7 @@ func (lb *loadBalancer) HealthCheck() {
 	defer lb.mu.Unlock()
 
 	for _, server := range lb.serverPool {
-		alive := serverHealthCheck(server.GetURL())
+		alive := server.HealthCheck()
 		server.SetAlive(alive)
 	}
-}
-
-func serverHealthCheck(url string) bool {
-	// TODO: implement healthchecks
-	return true
 }
